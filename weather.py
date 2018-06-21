@@ -1,6 +1,7 @@
 import urllib.request
 import json
 import datetime
+import requests
 
 # Alexandria, VA
 
@@ -45,3 +46,20 @@ for hour in next_12_hours:
 		temp_low = hour['temperature']
 
 print("Over the next 12 hours, we'll see a high of", temp_high, "and a low of", temp_low)
+
+
+r = requests.post("https://hooks.slack.com/services/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", json={"text":"Hello, World!"})
+print(r.headers['content-type'])
+print(r.status_code, r.reason)
+
+
+#curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' https://hooks.slack.com/services/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
+
+# payload_encoded = urllib.parse.urlencode({ "text":"Hello, World!" }).encode('utf-8')
+
+# url = urllib.request.Request('', data=payload_encoded, method='POST')
+#decoded_json = urllib.request.urlopen(url).read().decode('utf-8')
+#resp_json = json.loads(decoded_json)
+
+#print(resp_json)
+
