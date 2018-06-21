@@ -1,1 +1,1 @@
-# weather-app
+# slack-weather-bot
