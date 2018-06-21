@@ -2,42 +2,35 @@ import urllib.request
 import json
 import datetime
 import requests
+import variables
+import os
 
-# Alexandria, VA
+# Dark Sky API
+# Coordinates are Alexandria, VA --> (38.820450,-77.050552)
 
-#city = input("Enter a city to check the weather: ")
-
-weather_contents = urllib.request.urlopen("https://api.darksky.net/forecast/64127b8583a0e23fd8cf0aad56df2de3/38.820450,-77.050552?exclude=[minutely,daily,flags]/").read()
+weather_contents = urllib.request.urlopen("https://api.darksky.net/forecast/" + os.environ["DARKSKY_KEY"]+ "/38.820450,-77.050552?exclude=[minutely,daily,flags]/").read()
 weather_json = json.loads(weather_contents.decode('utf-8'))
 
+# " --------- Currently Summary --------- " )
+
 currently = weather_json['currently']
-currently_summary = currently['summary']
 
-print("\n\n\n--------- Currently Summary --------- " )
+currentlyString = "`Current weather:` " + currently['summary'] + ". It's currently " + str(currently['temperature']) + " degrees, ( which feels like " + str(currently['apparentTemperature']) + " )"
 
-print("Hello! The current weather is:", currently_summary)
-print("It's currently", int(currently['temperature']), "degrees, ( which feels like",
-int(currently['apparentTemperature']),")")
-#print(currently)
-#print(currently_summary)
-# print(
-#     datetime.datetime.fromtimestamp(
-#         currently['time']
-#     ).strftime('%Y-%m-%d %H:%M:%S'))
+# print(datetime.datetime.fromtimestamp(currently['time']).strftime('%Y-%m-%d %H:%M:%S'))
 
-
+# " --------- Hourly Summary --------- "
 
 hourly = weather_json['hourly']
-hourly_summary = hourly['summary']
 
-print("\n\n\n--------- Hourly Summary --------- ")
-print("Hourly summary:", hourly_summary)
+hourlyString = "`Daily Forecast:` " + hourly['summary'] 
 
 hourly_data = hourly['data']
 next_12_hours = hourly_data[:12]
 
-temp_low = 2500
-temp_high = -1000
+# Determine temp. highs and lows
+
+temp_low = float('Inf'); temp_high = -float('Inf')
 
 for hour in next_12_hours:
 	if hour['temperature'] > temp_high:
@@ -45,21 +38,10 @@ for hour in next_12_hours:
 	if hour['temperature'] < temp_low:
 		temp_low = hour['temperature']
 
-print("Over the next 12 hours, we'll see a high of", temp_high, "and a low of", temp_low)
+tempString = "Over the next 12 hours, we'll see a high of `" + str(temp_high) + "` degrees and a low of `" + str(temp_low) + "` degrees"
 
-
-r = requests.post("https://hooks.slack.com/services/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", json={"text":"Hello, World!"})
-print(r.headers['content-type'])
-print(r.status_code, r.reason)
-
-
-#curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' https://hooks.slack.com/services/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
-
-# payload_encoded = urllib.parse.urlencode({ "text":"Hello, World!" }).encode('utf-8')
-
-# url = urllib.request.Request('', data=payload_encoded, method='POST')
-#decoded_json = urllib.request.urlopen(url).read().decode('utf-8')
-#resp_json = json.loads(decoded_json)
-
-#print(resp_json)
+# Make request to slack bot
+r1 = requests.post("https://hooks.slack.com/services/" + os.environ["SLACK_KEY"], json={"text": currentlyString})
+r2 = requests.post("https://hooks.slack.com/services/" + os.environ["SLACK_KEY"], json={"text": hourlyString})
+r3 = requests.post("https://hooks.slack.com/services/" + os.environ["SLACK_KEY"], json={"text": tempString})
 
